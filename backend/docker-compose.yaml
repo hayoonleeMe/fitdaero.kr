@@ -1,0 +1,17 @@
+name: fitdaero-backend
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: fitdaero
+      MYSQL_USER: fitdaero
+      MYSQL_PASSWORD: fitdaero
+      MYSQL_ROOT_PASSWORD: fitdaero-root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+volumes:
+  mysql-data:

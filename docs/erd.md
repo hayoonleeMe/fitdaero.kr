@@ -102,9 +102,9 @@ erDiagram
 | `UNIQUE(source_type, file_checksum)` | 같은 프로그램 파일의 중복 적재 방지 |
 | `UNIQUE(source_type, request_signature)` | 같은 체력 API 요청 조건의 중복 배치 방지 |
 
-`data_version`은 API 응답에 노출하는 원천 버전이다. `PUBLIC_PROGRAM`은 확장자를 제외한 원본 파일명, `FITNESS_MEASUREMENT_API`는 `NFA_API_<collected_from_ym>-<collected_to_ym>`으로 기록한다.
+`data_version`은 API 응답에 노출하는 원천 버전이다. `PUBLIC_FACILITY_PROGRAM`은 확장자를 제외한 원본 파일명, `FITNESS_MEASUREMENT_API`는 `NFA_API_<collected_from_ym>-<collected_to_ym>`으로 기록한다.
 
-`PUBLIC_PROGRAM`은 `file_name`, `file_checksum`을 필수로 사용하고 API 전용 필드는 비운다. `FITNESS_MEASUREMENT_API`는 키를 제외한 API 엔드포인트를 `source_locator`에, 요청 조건 SHA-256을 `request_signature`에, 수집 시작·종료월을 `collected_from_ym`, `collected_to_ym`에 기록하고 파일 전용 필드는 비운다.
+`PUBLIC_FACILITY_PROGRAM`은 `file_name`, `file_checksum`을 필수로 사용하고 API 전용 필드는 비운다. `FITNESS_MEASUREMENT_API`는 키를 제외한 API 엔드포인트를 `source_locator`에, 요청 조건 SHA-256을 `request_signature`에, 수집 시작·종료월을 `collected_from_ym`, `collected_to_ym`에 기록하고 파일 전용 필드는 비운다.
 
 `request_signature`에는 API 엔드포인트, 성인 조건, `F/M`, 수집 기간, 응답 형식만 포함한다. API 키와 키가 포함된 URL은 포함하지 않는다.
 
@@ -120,7 +120,7 @@ erDiagram
 
 | source_type | 용도 |
 | --- | --- |
-| `PUBLIC_PROGRAM` | 시설·프로그램 적재 |
+| `PUBLIC_FACILITY_PROGRAM` | 시설·프로그램 적재 |
 | `FITNESS_MEASUREMENT_API` | 체력 기준 통계 생성 |
 
 `last_error_message`에는 마지막 원천 수준 실패의 요약만 기록한다. API 키, 키가 포함된 URL, 개인 측정행, 원본 응답 전문은 기록하지 않는다.
