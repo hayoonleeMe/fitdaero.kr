@@ -32,7 +32,7 @@ CREATE
                 ),
                 CONSTRAINT ck_data_import_source_type CHECK(
                     source_type IN(
-                        'PUBLIC_PROGRAM',
+                        'PUBLIC_FACILITY_PROGRAM',
                         'FITNESS_MEASUREMENT_API'
                     )
                 ),
@@ -45,7 +45,7 @@ CREATE
                 ),
                 CONSTRAINT ck_data_import_source_fields CHECK(
                     (
-                        source_type = 'PUBLIC_PROGRAM'
+                        source_type = 'PUBLIC_FACILITY_PROGRAM'
                         AND file_name IS NOT NULL
                         AND file_checksum IS NOT NULL
                         AND source_locator IS NULL

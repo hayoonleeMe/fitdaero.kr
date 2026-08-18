@@ -86,4 +86,33 @@ public class Program {
   private LocalDateTime updatedAt;
 
   protected Program() {}
+
+  public static Program create(
+      Facility facility,
+      DataImport dataImport,
+      String sourceKey,
+      String name,
+      String targetName,
+      LocalDate startsOn,
+      LocalDate endsOn,
+      String weekdayText,
+      String timeText,
+      ProgramCategory programCategory,
+      AdultEligibility adultEligibility,
+      String normalizationStatus) {
+    Program program = new Program();
+    program.facility = facility;
+    program.dataImport = dataImport;
+    program.sourceKey = sourceKey;
+    program.name = name;
+    program.targetName = targetName;
+    program.startsOn = startsOn;
+    program.endsOn = endsOn;
+    program.weekdayText = weekdayText;
+    program.timeText = timeText;
+    program.programCategory = programCategory;
+    program.adultEligibility = adultEligibility;
+    program.normalizationStatus = normalizationStatus;
+    return program;
+  }
 }

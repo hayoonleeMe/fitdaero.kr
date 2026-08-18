@@ -62,4 +62,23 @@ public class Facility {
   private LocalDateTime updatedAt;
 
   protected Facility() {}
+
+  public static Facility create(
+      String sourceKey,
+      String name,
+      String sidoCode,
+      String sidoName,
+      String sigunguCode,
+      String sigunguName,
+      String address) {
+    Facility facility = new Facility();
+    facility.sourceKey = sourceKey;
+    facility.name = name;
+    facility.sidoCode = sidoCode;
+    facility.sidoName = sidoName;
+    facility.sigunguCode = sigunguCode;
+    facility.sigunguName = sigunguName;
+    facility.address = address;
+    return facility;
+  }
 }

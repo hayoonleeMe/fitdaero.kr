@@ -73,4 +73,15 @@ public class DataImport {
   private LocalDateTime updatedAt;
 
   protected DataImport() {}
+
+  public static DataImport startPublicFacilityProgram(
+      String dataVersion, String fileName, String fileChecksum) {
+    DataImport dataImport = new DataImport();
+    dataImport.sourceType = DataImportSourceType.PUBLIC_FACILITY_PROGRAM;
+    dataImport.dataVersion = dataVersion;
+    dataImport.fileName = fileName;
+    dataImport.fileChecksum = fileChecksum;
+    dataImport.status = DataImportStatus.RUNNING;
+    return dataImport;
+  }
 }
