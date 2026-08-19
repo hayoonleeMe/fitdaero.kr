@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import kr.fitdaero.dataimport.domain.DataImport;
 import kr.fitdaero.facility.domain.Facility;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -60,6 +61,7 @@ public class Program {
 
   private Integer recruitmentCapacity;
 
+  @Getter
   @Column(precision = 12, scale = 2)
   private BigDecimal price;
 
@@ -114,5 +116,77 @@ public class Program {
     program.adultEligibility = adultEligibility;
     program.normalizationStatus = normalizationStatus;
     return program;
+  }
+
+  public static Program create(
+      Facility facility,
+      DataImport dataImport,
+      String sourceKey,
+      String typeName,
+      String name,
+      String targetName,
+      LocalDate startsOn,
+      LocalDate endsOn,
+      String weekdayText,
+      Byte weekdayMask,
+      String timeText,
+      Integer recruitmentCapacity,
+      BigDecimal price,
+      String priceTypeName,
+      ProgramCategory programCategory,
+      AdultEligibility adultEligibility,
+      String normalizationStatus) {
+    Program program =
+        create(
+            facility,
+            dataImport,
+            sourceKey,
+            name,
+            targetName,
+            startsOn,
+            endsOn,
+            weekdayText,
+            timeText,
+            programCategory,
+            adultEligibility,
+            normalizationStatus);
+    program.update(
+        dataImport,
+        typeName,
+        weekdayText,
+        weekdayMask,
+        timeText,
+        recruitmentCapacity,
+        price,
+        priceTypeName,
+        programCategory,
+        adultEligibility,
+        normalizationStatus);
+    return program;
+  }
+
+  public void update(
+      DataImport dataImport,
+      String typeName,
+      String weekdayText,
+      Byte weekdayMask,
+      String timeText,
+      Integer recruitmentCapacity,
+      BigDecimal price,
+      String priceTypeName,
+      ProgramCategory programCategory,
+      AdultEligibility adultEligibility,
+      String normalizationStatus) {
+    this.dataImport = dataImport;
+    this.typeName = typeName;
+    this.weekdayText = weekdayText;
+    this.weekdayMask = weekdayMask;
+    this.timeText = timeText;
+    this.recruitmentCapacity = recruitmentCapacity;
+    this.price = price;
+    this.priceTypeName = priceTypeName;
+    this.programCategory = programCategory;
+    this.adultEligibility = adultEligibility;
+    this.normalizationStatus = normalizationStatus;
   }
 }

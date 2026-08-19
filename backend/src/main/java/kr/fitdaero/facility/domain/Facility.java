@@ -81,4 +81,59 @@ public class Facility {
     facility.address = address;
     return facility;
   }
+
+  public static Facility create(
+      String sourceKey,
+      String name,
+      String sidoCode,
+      String sidoName,
+      String sigunguCode,
+      String sigunguName,
+      String emdName,
+      String address,
+      BigDecimal latitude,
+      BigDecimal longitude,
+      String phoneNumber,
+      String homepageUrl) {
+    Facility facility =
+        create(sourceKey, name, sidoCode, sidoName, sigunguCode, sigunguName, address);
+    facility.update(
+        name,
+        sidoCode,
+        sidoName,
+        sigunguCode,
+        sigunguName,
+        emdName,
+        address,
+        latitude,
+        longitude,
+        phoneNumber,
+        homepageUrl);
+    return facility;
+  }
+
+  public void update(
+      String name,
+      String sidoCode,
+      String sidoName,
+      String sigunguCode,
+      String sigunguName,
+      String emdName,
+      String address,
+      BigDecimal latitude,
+      BigDecimal longitude,
+      String phoneNumber,
+      String homepageUrl) {
+    this.name = name;
+    this.sidoCode = sidoCode;
+    this.sidoName = sidoName;
+    this.sigunguCode = sigunguCode;
+    this.sigunguName = sigunguName;
+    this.emdName = emdName;
+    this.address = address;
+    this.latitude = latitude;
+    this.longitude = longitude;
+    this.phoneNumber = phoneNumber;
+    this.homepageUrl = homepageUrl;
+  }
 }

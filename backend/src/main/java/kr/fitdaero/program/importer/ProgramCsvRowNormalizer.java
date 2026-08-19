@@ -1,5 +1,6 @@
 package kr.fitdaero.program.importer;
 
+import java.math.BigDecimal;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -64,6 +65,11 @@ final class ProgramCsvRowNormalizer {
             sidoName,
             sigunguCode,
             sigunguName,
+            nullableText(row.get("EMD_NM")),
+            decimal(row.get("FCLTY_LA")),
+            decimal(row.get("FCLTY_LO")),
+            nullableText(row.get("FCLTY_TEL_NO")),
+            nullableText(row.get("HMPG_URL")),
             typeName,
             name,
             targetName,
@@ -72,6 +78,9 @@ final class ProgramCsvRowNormalizer {
             weekdayText,
             weekdayMask(weekdayText),
             text(row.get("PROGRM_ESTBL_TIZN_VALUE")),
+            integer(row.get("PROGRM_RCRIT_NMPR_CO")),
+            decimal(row.get("PROGRM_PRC")),
+            nullableText(row.get("PROGRM_PRC_TY_NM")),
             category(typeName, name),
             adultEligibility(targetName)));
   }
@@ -92,6 +101,27 @@ final class ProgramCsvRowNormalizer {
   private static String value(Map<String, String> row, String column) {
     String value = row.get(column);
     return value == null ? "" : value;
+  }
+
+  private static String nullableText(String value) {
+    String normalized = text(value);
+    return normalized.isEmpty() ? null : normalized;
+  }
+
+  private static Integer integer(String value) {
+    try {
+      return Integer.valueOf(text(value));
+    } catch (NumberFormatException exception) {
+      return null;
+    }
+  }
+
+  private static BigDecimal decimal(String value) {
+    try {
+      return new BigDecimal(text(value));
+    } catch (NumberFormatException exception) {
+      return null;
+    }
   }
 
   private static String text(String value) {
