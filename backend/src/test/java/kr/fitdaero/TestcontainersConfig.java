@@ -12,8 +12,7 @@ public class TestcontainersConfig {
   @ServiceConnection
   MySQLContainer<?> mysqlContainer() {
     return new MySQLContainer<>("mysql:8.4")
-        .withDatabaseName("fitdaero")
-        .withUsername("fitdaero")
-        .withPassword("fitdaero");
+        .withUrlParam("useSSL", "false")
+        .withUrlParam("allowPublicKeyRetrieval", "true");
   }
 }
