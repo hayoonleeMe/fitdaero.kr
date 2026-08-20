@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PushbackReader;
 import java.io.Reader;
 import java.io.UncheckedIOException;
 import java.nio.charset.CodingErrorAction;
@@ -120,7 +121,13 @@ public class ProgramCsvImporter {
 
     try (Reader reader = reader(csvFile);
         CSVParser parser =
-            CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).get().parse(reader)) {
+            CSVFormat.DEFAULT
+                .builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .setEscape('\\')
+                .get()
+                .parse(reader)) {
       validateHeaders(parser.getHeaderMap());
       for (CSVRecord record : parser) {
         totalCount++;
@@ -145,6 +152,7 @@ public class ProgramCsvImporter {
     if (successCount == 0) {
       throw new ImportFailure(totalCount, successCount, failureCount, new IllegalStateException());
     }
+
     dataImport.complete(totalCount, successCount, failureCount);
   }
 
@@ -271,12 +279,19 @@ public class ProgramCsvImporter {
   }
 
   private Reader reader(Path csvFile) throws IOException {
-    return new InputStreamReader(
-        Files.newInputStream(csvFile),
-        StandardCharsets.UTF_8
-            .newDecoder()
-            .onMalformedInput(CodingErrorAction.REPORT)
-            .onUnmappableCharacter(CodingErrorAction.REPORT));
+    PushbackReader reader =
+        new PushbackReader(
+            new InputStreamReader(
+                Files.newInputStream(csvFile),
+                StandardCharsets.UTF_8
+                    .newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)));
+    int firstCharacter = reader.read();
+    if (firstCharacter != '\uFEFF' && firstCharacter != -1) {
+      reader.unread(firstCharacter);
+    }
+    return reader;
   }
 
   private String checksum(Path csvFile) {
@@ -323,4 +338,5 @@ public class ProgramCsvImporter {
       this.failureCount = failureCount;
     }
   }
+
 }

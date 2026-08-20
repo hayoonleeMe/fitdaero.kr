@@ -65,7 +65,6 @@ public class DataImport {
   @Column(length = 1000)
   private String lastErrorMessage;
 
-  @CreationTimestamp
   @Column(nullable = false)
   private LocalDateTime startedAt;
 
@@ -89,6 +88,7 @@ public class DataImport {
     dataImport.fileName = fileName;
     dataImport.fileChecksum = fileChecksum;
     dataImport.status = DataImportStatus.RUNNING;
+    dataImport.startedAt = LocalDateTime.now();
     return dataImport;
   }
 

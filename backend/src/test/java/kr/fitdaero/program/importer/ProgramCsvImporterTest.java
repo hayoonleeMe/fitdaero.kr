@@ -100,6 +100,31 @@ class ProgramCsvImporterTest {
   }
 
   @Test
+  void importsUtf8BomCsv() throws IOException {
+    importer.importFile(csvWithBom("bom.csv", row("성인 수영", "24000")));
+
+    assertThat(dataImportRepository.findAll().getFirst().getStatus())
+        .isEqualTo(DataImportStatus.COMPLETED);
+    assertThat(programRepository.count()).isEqualTo(1);
+  }
+
+  @Test
+  void importsBackslashEscapedQuotes() throws IOException {
+    Path csvFile = csv("backslash-escaped.csv", row("placeholder", "24000"));
+    Files.writeString(
+        csvFile,
+        Files.readString(csvFile, StandardCharsets.UTF_8)
+            .replace("\"placeholder\"", "\"\\\" (화목)\""),
+        StandardCharsets.UTF_8);
+
+    importer.importFile(csvFile);
+
+    assertThat(dataImportRepository.findAll().getFirst().getStatus())
+        .isEqualTo(DataImportStatus.COMPLETED);
+    assertThat(programRepository.count()).isEqualTo(1);
+  }
+
+  @Test
   void retriesFailedImportWithTheSameChecksum() throws IOException {
     Path csvFile = csv("retry.csv", row("성인 수영", "24000"));
     DataImport failed =
@@ -155,14 +180,27 @@ class ProgramCsvImporterTest {
 
   @SafeVarargs
   private final Path csv(String fileName, List<String>... rows) throws IOException {
+    return csv(fileName, false, List.of(rows));
+  }
+
+  @SafeVarargs
+  private final Path csvWithBom(String fileName, List<String>... rows) throws IOException {
+    return csv(fileName, true, List.of(rows));
+  }
+
+  private Path csv(String fileName, boolean withBom, List<List<String>> rows) throws IOException {
     Path csvFile = tempDir.resolve(fileName);
-    try (Writer writer = Files.newBufferedWriter(csvFile, StandardCharsets.UTF_8);
-        CSVPrinter printer =
-            new CSVPrinter(
-                writer,
-                CSVFormat.DEFAULT.builder().setHeader(HEADERS.toArray(String[]::new)).get())) {
-      for (List<String> row : rows) {
-        printer.printRecord(row);
+    try (Writer writer = Files.newBufferedWriter(csvFile, StandardCharsets.UTF_8)) {
+      if (withBom) {
+        writer.write('\uFEFF');
+      }
+      try (CSVPrinter printer =
+          new CSVPrinter(
+              writer,
+              CSVFormat.DEFAULT.builder().setHeader(HEADERS.toArray(String[]::new)).get())) {
+        for (List<String> row : rows) {
+          printer.printRecord(row);
+        }
       }
     }
     return csvFile;
