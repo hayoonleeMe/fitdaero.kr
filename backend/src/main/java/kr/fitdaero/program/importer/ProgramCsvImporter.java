@@ -13,10 +13,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import kr.fitdaero.dataimport.domain.DataImport;
 import kr.fitdaero.dataimport.domain.DataImportRepository;
 import kr.fitdaero.dataimport.domain.DataImportSourceType;
@@ -25,6 +29,7 @@ import kr.fitdaero.facility.domain.Facility;
 import kr.fitdaero.facility.domain.FacilityRepository;
 import kr.fitdaero.program.domain.Program;
 import kr.fitdaero.program.domain.ProgramRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -33,9 +38,11 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
+@Slf4j
 public class ProgramCsvImporter {
 
   private static final int BATCH_SIZE = 500;
+  private static final int PROGRESS_LOG_INTERVAL = 10_000;
   private static final List<String> REQUIRED_HEADERS =
       List.of(
           "FCLTY_NM",
@@ -118,6 +125,7 @@ public class ProgramCsvImporter {
     int successCount = 0;
     int failureCount = 0;
     DataImport dataImport = dataImportRepository.getReferenceById(importId);
+    List<ProgramCsvRow> rows = new ArrayList<>(BATCH_SIZE);
 
     try (Reader reader = reader(csvFile);
         CSVParser parser =
@@ -129,20 +137,30 @@ public class ProgramCsvImporter {
                 .get()
                 .parse(reader)) {
       validateHeaders(parser.getHeaderMap());
+      log.info("Program CSV headers validated: {}", csvFile);
       for (CSVRecord record : parser) {
         totalCount++;
         Optional<ProgramCsvRow> row = ProgramCsvRowNormalizer.normalize(record.toMap());
         if (row.isPresent()) {
-          upsert(row.get(), dataImport);
+          rows.add(row.get());
           successCount++;
         } else {
           failureCount++;
         }
 
-        if (totalCount % BATCH_SIZE == 0) {
+        if (rows.size() == BATCH_SIZE) {
+          upsert(rows, dataImport);
+          rows.clear();
           entityManager.flush();
           entityManager.clear();
           dataImport = dataImportRepository.getReferenceById(importId);
+        }
+        if (totalCount % PROGRESS_LOG_INTERVAL == 0) {
+          log.info(
+              "Program CSV import progress: total={}, valid={}, invalid={}",
+              totalCount,
+              successCount,
+              failureCount);
         }
       }
     } catch (IOException exception) {
@@ -153,7 +171,13 @@ public class ProgramCsvImporter {
       throw new ImportFailure(totalCount, successCount, failureCount, new IllegalStateException());
     }
 
+    upsert(rows, dataImport);
     dataImport.complete(totalCount, successCount, failureCount);
+    log.info(
+        "Program CSV rows processed; committing: total={}, valid={}, invalid={}",
+        totalCount,
+        successCount,
+        failureCount);
   }
 
   private void validateHeaders(Map<String, Integer> headerMap) {
@@ -182,18 +206,38 @@ public class ProgramCsvImporter {
     return (cause == null ? exception : cause).getClass().getSimpleName();
   }
 
-  private void upsert(ProgramCsvRow row, DataImport dataImport) {
-    String facilityKey = key(row.facilityName(), row.facilityAddress());
-    Facility facility =
-        facilityRepository
-            .findBySourceKey(facilityKey)
-            .map(
-                existing -> {
-                  updateFacility(existing, row);
-                  return existing;
-                })
-            .orElseGet(() -> facilityRepository.save(createFacility(facilityKey, row)));
+  private void upsert(List<ProgramCsvRow> rows, DataImport dataImport) {
+    if (rows.isEmpty()) {
+      return;
+    }
 
+    List<ImportRow> importRows = rows.stream().map(this::toImportRow).toList();
+    Map<String, Facility> facilities = facilitiesBySourceKey(importRows);
+    Map<String, Program> programs = programsBySourceKey(importRows);
+    for (ImportRow importRow : importRows) {
+      ProgramCsvRow row = importRow.row();
+      Facility facility = facilities.get(importRow.facilityKey());
+      if (facility == null) {
+        facility = facilityRepository.save(createFacility(importRow.facilityKey(), row));
+        facilities.put(importRow.facilityKey(), facility);
+      } else {
+        updateFacility(facility, row);
+      }
+
+      Program program = programs.get(importRow.programKey());
+      if (program == null) {
+        program =
+            programRepository.save(
+                createProgram(facility, dataImport, importRow.programKey(), row));
+        programs.put(importRow.programKey(), program);
+      } else {
+        updateProgram(program, dataImport, row);
+      }
+    }
+  }
+
+  private ImportRow toImportRow(ProgramCsvRow row) {
+    String facilityKey = key(row.facilityName(), row.facilityAddress());
     String programKey =
         key(
             facilityKey,
@@ -203,11 +247,23 @@ public class ProgramCsvImporter {
             String.valueOf(row.weekdayMask()),
             row.timeText(),
             row.targetName());
-    programRepository
-        .findBySourceKey(programKey)
-        .ifPresentOrElse(
-            existing -> updateProgram(existing, dataImport, row),
-            () -> programRepository.save(createProgram(facility, dataImport, programKey, row)));
+    return new ImportRow(row, facilityKey, programKey);
+  }
+
+  private Map<String, Facility> facilitiesBySourceKey(List<ImportRow> rows) {
+    Set<String> sourceKeys = rows.stream().map(ImportRow::facilityKey).collect(Collectors.toSet());
+    return facilityRepository.findBySourceKeyIn(sourceKeys).stream()
+        .collect(
+            Collectors.toMap(
+                Facility::getSourceKey, facility -> facility, (left, right) -> left, HashMap::new));
+  }
+
+  private Map<String, Program> programsBySourceKey(List<ImportRow> rows) {
+    Set<String> sourceKeys = rows.stream().map(ImportRow::programKey).collect(Collectors.toSet());
+    return programRepository.findBySourceKeyIn(sourceKeys).stream()
+        .collect(
+            Collectors.toMap(
+                Program::getSourceKey, program -> program, (left, right) -> left, HashMap::new));
   }
 
   private Facility createFacility(String facilityKey, ProgramCsvRow row) {
@@ -338,5 +394,7 @@ public class ProgramCsvImporter {
       this.failureCount = failureCount;
     }
   }
+
+  private record ImportRow(ProgramCsvRow row, String facilityKey, String programKey) {}
 
 }

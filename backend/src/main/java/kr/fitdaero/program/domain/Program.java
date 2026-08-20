@@ -34,6 +34,7 @@ public class Program {
   @JoinColumn(name = "import_id", nullable = false)
   private DataImport dataImport;
 
+  @Getter
   @Column(nullable = false, length = 64)
   private String sourceKey;
 

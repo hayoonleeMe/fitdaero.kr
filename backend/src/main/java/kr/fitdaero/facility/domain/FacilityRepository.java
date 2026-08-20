@@ -1,9 +1,10 @@
 package kr.fitdaero.facility.domain;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FacilityRepository extends JpaRepository<Facility, Long> {
 
-  Optional<Facility> findBySourceKey(String sourceKey);
+  List<Facility> findBySourceKeyIn(Collection<String> sourceKeys);
 }

@@ -1,9 +1,10 @@
 package kr.fitdaero.program.domain;
 
-import java.util.Optional;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProgramRepository extends JpaRepository<Program, Long> {
 
-  Optional<Program> findBySourceKey(String sourceKey);
+  List<Program> findBySourceKeyIn(Collection<String> sourceKeys);
 }

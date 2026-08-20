@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
 import kr.fitdaero.TestcontainersConfig;
@@ -178,6 +179,25 @@ class ProgramCsvImporterTest {
         .isEqualTo(DataImportStatus.FAILED);
   }
 
+  @Test
+  void batchesLookupsAndKeepsTheLastValueForDuplicateProgramKeys() throws IOException {
+    List<List<String>> rows = new ArrayList<>();
+    rows.add(row("같은 프로그램", "10000"));
+    rows.add(row("같은 프로그램", "20000"));
+    for (int index = 1; index < 500; index++) {
+      rows.add(row("프로그램 " + index, "10000"));
+    }
+
+    importer.importFile(csv("batch.csv", rows));
+
+    assertThat(programRepository.count()).isEqualTo(500);
+    assertThat(
+            programRepository.findAll().stream()
+                .filter(program -> program.getPrice().compareTo(new BigDecimal("20000")) == 0)
+                .count())
+        .isEqualTo(1);
+  }
+
   @SafeVarargs
   private final Path csv(String fileName, List<String>... rows) throws IOException {
     return csv(fileName, false, List.of(rows));
@@ -186,6 +206,10 @@ class ProgramCsvImporterTest {
   @SafeVarargs
   private final Path csvWithBom(String fileName, List<String>... rows) throws IOException {
     return csv(fileName, true, List.of(rows));
+  }
+
+  private Path csv(String fileName, List<List<String>> rows) throws IOException {
+    return csv(fileName, false, rows);
   }
 
   private Path csv(String fileName, boolean withBom, List<List<String>> rows) throws IOException {

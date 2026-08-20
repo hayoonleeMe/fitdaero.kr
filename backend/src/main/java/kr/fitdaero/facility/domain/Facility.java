@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,6 +18,7 @@ public class Facility {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Getter
   @Column(nullable = false, length = 64)
   private String sourceKey;
 
