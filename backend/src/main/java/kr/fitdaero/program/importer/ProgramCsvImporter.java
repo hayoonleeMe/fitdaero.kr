@@ -80,16 +80,17 @@ public class ProgramCsvImporter {
     transactionTemplate = new TransactionTemplate(transactionManager);
   }
 
-  public void importFile(Path csvFile) {
+  public ImportResult importFile(Path csvFile) {
     String checksum = checksum(csvFile);
     DataImport dataImport = prepareImport(csvFile, checksum);
     if (dataImport == null) {
-      return;
+      return ImportResult.SKIPPED;
     }
 
     try {
       Long importId = dataImport.getId();
       transactionTemplate.executeWithoutResult(status -> importRows(csvFile, importId));
+      return ImportResult.COMPLETED;
     } catch (ImportFailure exception) {
       fail(
           dataImport.getId(),
@@ -97,9 +98,12 @@ public class ProgramCsvImporter {
           exception.successCount,
           exception.failureCount,
           exception);
+      log.warn("Program CSV import failed: {} ({})", csvFile, errorSummary(exception));
     } catch (RuntimeException exception) {
       fail(dataImport.getId(), 0, 0, 0, exception);
+      log.warn("Program CSV import failed: {} ({})", csvFile, errorSummary(exception));
     }
+    return ImportResult.FAILED;
   }
 
   private DataImport prepareImport(Path csvFile, String checksum) {
@@ -395,6 +399,11 @@ public class ProgramCsvImporter {
     }
   }
 
-  private record ImportRow(ProgramCsvRow row, String facilityKey, String programKey) {}
+  public enum ImportResult {
+    COMPLETED,
+    SKIPPED,
+    FAILED
+  }
 
+  private record ImportRow(ProgramCsvRow row, String facilityKey, String programKey) {}
 }

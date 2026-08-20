@@ -78,7 +78,7 @@ class ProgramCsvImporterTest {
   void importsQuotedRowsAndUpsertsExistingPrograms() throws IOException {
     Path first = csv("program.csv", row("성인 수영", "24000.00000"));
 
-    importer.importFile(first);
+    assertThat(importer.importFile(first)).isEqualTo(ProgramCsvImporter.ImportResult.COMPLETED);
 
     DataImport firstImport = dataImportRepository.findAll().getFirst();
     assertThat(firstImport.getDataVersion()).isEqualTo("program");
@@ -89,10 +89,11 @@ class ProgramCsvImporterTest {
     assertThat(facilityRepository.count()).isEqualTo(1);
     assertThat(programRepository.count()).isEqualTo(1);
 
-    importer.importFile(first);
+    assertThat(importer.importFile(first)).isEqualTo(ProgramCsvImporter.ImportResult.SKIPPED);
     assertThat(dataImportRepository.count()).isEqualTo(1);
 
-    importer.importFile(csv("program-updated.csv", row("성인 수영", "30000")));
+    assertThat(importer.importFile(csv("program-updated.csv", row("성인 수영", "30000"))))
+        .isEqualTo(ProgramCsvImporter.ImportResult.COMPLETED);
     assertThat(dataImportRepository.count()).isEqualTo(2);
     assertThat(facilityRepository.count()).isEqualTo(1);
     assertThat(programRepository.count()).isEqualTo(1);
@@ -102,7 +103,8 @@ class ProgramCsvImporterTest {
 
   @Test
   void importsUtf8BomCsv() throws IOException {
-    importer.importFile(csvWithBom("bom.csv", row("성인 수영", "24000")));
+    assertThat(importer.importFile(csvWithBom("bom.csv", row("성인 수영", "24000"))))
+        .isEqualTo(ProgramCsvImporter.ImportResult.COMPLETED);
 
     assertThat(dataImportRepository.findAll().getFirst().getStatus())
         .isEqualTo(DataImportStatus.COMPLETED);
@@ -118,7 +120,7 @@ class ProgramCsvImporterTest {
             .replace("\"placeholder\"", "\"\\\" (화목)\""),
         StandardCharsets.UTF_8);
 
-    importer.importFile(csvFile);
+    assertThat(importer.importFile(csvFile)).isEqualTo(ProgramCsvImporter.ImportResult.COMPLETED);
 
     assertThat(dataImportRepository.findAll().getFirst().getStatus())
         .isEqualTo(DataImportStatus.COMPLETED);
@@ -133,7 +135,7 @@ class ProgramCsvImporterTest {
     failed.fail("InterruptedException");
     dataImportRepository.saveAndFlush(failed);
 
-    importer.importFile(csvFile);
+    assertThat(importer.importFile(csvFile)).isEqualTo(ProgramCsvImporter.ImportResult.COMPLETED);
 
     DataImport retried =
         dataImportRepository
@@ -149,12 +151,14 @@ class ProgramCsvImporterTest {
     Path missingHeaders = tempDir.resolve("missing.csv");
     Files.writeString(missingHeaders, "FCLTY_NM,PROGRM_NM\n체육관,수영\n", StandardCharsets.UTF_8);
 
-    importer.importFile(missingHeaders);
+    assertThat(importer.importFile(missingHeaders))
+        .isEqualTo(ProgramCsvImporter.ImportResult.FAILED);
     assertThat(dataImportRepository.findAll().getFirst().getStatus())
         .isEqualTo(DataImportStatus.FAILED);
 
     cleanUp();
-    importer.importFile(csv("invalid.csv", row("", "24000")));
+    assertThat(importer.importFile(csv("invalid.csv", row("", "24000"))))
+        .isEqualTo(ProgramCsvImporter.ImportResult.FAILED);
 
     DataImport invalidRows = dataImportRepository.findAll().getFirst();
     assertThat(invalidRows.getStatus()).isEqualTo(DataImportStatus.FAILED);
@@ -166,7 +170,10 @@ class ProgramCsvImporterTest {
   void keepsCompletedProgramsWhenNewImportFailsDuringDatabaseWrite() throws IOException {
     importer.importFile(csv("completed.csv", row("기존 수영", "24000")));
 
-    importer.importFile(csv("broken.csv", row("새 수영", "24000"), row("n".repeat(256), "24000")));
+    assertThat(
+            importer.importFile(
+                csv("broken.csv", row("새 수영", "24000"), row("n".repeat(256), "24000"))))
+        .isEqualTo(ProgramCsvImporter.ImportResult.FAILED);
 
     assertThat(programRepository.count()).isEqualTo(1);
     assertThat(dataImportRepository.count()).isEqualTo(2);
