@@ -8,12 +8,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalDateTime;
+import lombok.Getter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 public class DataImport {
 
+  @Getter
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -22,6 +24,7 @@ public class DataImport {
   @Column(nullable = false, length = 50)
   private DataImportSourceType sourceType;
 
+  @Getter
   @Column(nullable = false)
   private String dataVersion;
 
@@ -42,23 +45,26 @@ public class DataImport {
   @Column(length = 6)
   private String collectedToYm;
 
+  @Getter
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   private DataImportStatus status;
 
+  @Getter
   @Column(nullable = false)
   private int totalCount;
 
+  @Getter
   @Column(nullable = false)
   private int successCount;
 
+  @Getter
   @Column(nullable = false)
   private int failureCount;
 
   @Column(length = 1000)
   private String lastErrorMessage;
 
-  @CreationTimestamp
   @Column(nullable = false)
   private LocalDateTime startedAt;
 
@@ -82,6 +88,38 @@ public class DataImport {
     dataImport.fileName = fileName;
     dataImport.fileChecksum = fileChecksum;
     dataImport.status = DataImportStatus.RUNNING;
+    dataImport.startedAt = LocalDateTime.now();
     return dataImport;
+  }
+
+  public void restart() {
+    status = DataImportStatus.RUNNING;
+    totalCount = 0;
+    successCount = 0;
+    failureCount = 0;
+    lastErrorMessage = null;
+    startedAt = LocalDateTime.now();
+    completedAt = null;
+  }
+
+  public void complete(int totalCount, int successCount, int failureCount) {
+    status = DataImportStatus.COMPLETED;
+    this.totalCount = totalCount;
+    this.successCount = successCount;
+    this.failureCount = failureCount;
+    completedAt = LocalDateTime.now();
+  }
+
+  public void fail(String errorMessage) {
+    fail(totalCount, successCount, failureCount, errorMessage);
+  }
+
+  public void fail(int totalCount, int successCount, int failureCount, String errorMessage) {
+    status = DataImportStatus.FAILED;
+    this.totalCount = totalCount;
+    this.successCount = successCount;
+    this.failureCount = failureCount;
+    lastErrorMessage = errorMessage;
+    completedAt = LocalDateTime.now();
   }
 }

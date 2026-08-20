@@ -1,6 +1,8 @@
 spring:
   application:
     name: fitdaero-backend
+  config:
+    import: optional:file:./.env[.properties]
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/fitdaero}
     username: ${DB_USERNAME:fitdaero}
@@ -10,3 +12,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+
+app:
+  import:
+    on-startup: ${APP_IMPORT_ON_STARTUP:false}
+    program-csv-path: ${APP_PROGRAM_CSV_PATH:}
