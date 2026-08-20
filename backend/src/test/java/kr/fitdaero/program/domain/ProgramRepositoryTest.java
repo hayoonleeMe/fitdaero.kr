@@ -64,6 +64,8 @@ class ProgramRepositoryTest {
   void findsOnlyEligibleCandidatesInSigungu() {
     LocalDate today = LocalDate.now();
     DataImport dataImport = completedImport("candidate", "d".repeat(64), LocalDateTime.now());
+    DataImport otherImport =
+        completedImport("other-candidate", "p".repeat(64), LocalDateTime.now().minusMinutes(1));
     Facility localFacility = facility("e".repeat(64), "11000");
 
     program(
@@ -72,6 +74,13 @@ class ProgramRepositoryTest {
         dataImport,
         facility("f".repeat(64), "12000"),
         "other-sigungu",
+        today,
+        (byte) 1,
+        AdultEligibility.ADULT_EXPLICIT);
+    program(
+        otherImport,
+        localFacility,
+        "other-import",
         today,
         (byte) 1,
         AdultEligibility.ADULT_EXPLICIT);
@@ -94,11 +103,13 @@ class ProgramRepositoryTest {
         dataImport, localFacility, "unknown-weekday", today, null, AdultEligibility.ADULT_EXPLICIT);
 
     List<RecommendationCandidateProjection> candidates =
-        programRepository.findRecommendationCandidatesBySidoAndSigungu("11", "11000", today, 1);
+        programRepository.findRecommendationCandidatesBySidoAndSigungu(
+            "11", "11000", dataImport.getId(), today, 1);
 
     assertThat(candidates).hasSize(1);
     RecommendationCandidateProjection candidate = candidates.getFirst();
     assertThat(candidate.getProgramName()).isEqualTo("eligible");
+    assertThat(candidate.getTypeName()).isEqualTo("수영");
     assertThat(candidate.getFacilityName()).isEqualTo("핏대로체육관");
     assertThat(candidate.getAddress()).isEqualTo("서울특별시 종로구 운동로 1");
     assertThat(candidate.getProgramCategory()).isEqualTo(ProgramCategory.SWIMMING_AQUA.name());
@@ -134,7 +145,9 @@ class ProgramRepositoryTest {
         (byte) 1,
         AdultEligibility.ADULT_EXPLICIT);
 
-    assertThat(programRepository.findRecommendationCandidatesBySido("11", today, 1))
+    assertThat(
+            programRepository.findRecommendationCandidatesBySido(
+                "11", dataImport.getId(), today, 1))
         .extracting(RecommendationCandidateProjection::getProgramName)
         .containsExactlyInAnyOrder("jongno", "jung");
   }

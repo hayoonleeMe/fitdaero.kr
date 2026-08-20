@@ -10,7 +10,7 @@
 - `preferredCategories`와 `avoidedCategories`는 `ProgramCategory`의 복수 선택값이며 서로 겹칠 수 없다.
 - 추천 결과는 최대 5건이다.
 - 추천 요청은 적재를 실행하지 않는다. 기본 실행에서는 기존 완료 데이터만 사용하며, 프로그램 데이터가 없으면 빈 `recommendations`를 반환한다.
-- `dataVersions.publicProgram`은 가장 최근 완료 프로그램 적재의 `data_version`이며, 완료 프로그램 데이터가 없으면 `null`이다. 정밀 분석의 `dataVersions.fitnessReference`는 사용한 최신 완료 체력 API 적재의 `data_version`이다.
+- `dataVersions.publicFacilityProgram`은 가장 최근 완료 프로그램 적재의 `data_version`이며, 완료 프로그램 데이터가 없으면 `null`이다. 정밀 분석의 `dataVersions.fitnessReference`는 사용한 최신 완료 체력 API 적재의 `data_version`이다.
 
 ### 공통 입력 필드
 
@@ -60,7 +60,7 @@
   "analysisType": "SIMPLE",
   "analysisSummary": "선택한 목표와 생활 응답을 바탕으로 추천했어요.",
   "dataVersions": {
-    "publicProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606"
+    "publicFacilityProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606"
   },
   "searchScope": "SIGUNGU",
   "recommendations": []
@@ -121,7 +121,7 @@
     }
   ],
   "dataVersions": {
-    "publicProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606",
+    "publicFacilityProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606",
     "fitnessReference": "NFA_API_202201-202608"
   },
   "searchScope": "SIDO_FALLBACK",

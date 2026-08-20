@@ -14,6 +14,7 @@ public interface ProgramRepository extends JpaRepository<Program, Long> {
       """
       SELECT p.id AS programId,
              p.name AS programName,
+             p.type_name AS typeName,
              p.program_category AS programCategory,
              f.name AS facilityName,
              f.address AS address,
@@ -28,6 +29,7 @@ public interface ProgramRepository extends JpaRepository<Program, Long> {
       FROM program p
       JOIN facility f ON f.id = p.facility_id
       WHERE f.sido_code = :sidoCode
+        AND p.import_id = :importId
         AND p.ends_on >= :today
         AND p.weekday_mask IS NOT NULL
         AND (p.weekday_mask & :availableWeekdayMask) <> 0
@@ -40,12 +42,14 @@ public interface ProgramRepository extends JpaRepository<Program, Long> {
   List<RecommendationCandidateProjection> findRecommendationCandidatesBySidoAndSigungu(
       @Param("sidoCode") String sidoCode,
       @Param("sigunguCode") String sigunguCode,
+      @Param("importId") Long importId,
       @Param("today") LocalDate today,
       @Param("availableWeekdayMask") int availableWeekdayMask);
 
   @Query(value = RECOMMENDATION_CANDIDATE_SELECT, nativeQuery = true)
   List<RecommendationCandidateProjection> findRecommendationCandidatesBySido(
       @Param("sidoCode") String sidoCode,
+      @Param("importId") Long importId,
       @Param("today") LocalDate today,
       @Param("availableWeekdayMask") int availableWeekdayMask);
 

@@ -9,6 +9,8 @@ public interface RecommendationCandidateProjection {
 
   String getProgramName();
 
+  String getTypeName();
+
   String getProgramCategory();
 
   String getFacilityName();
