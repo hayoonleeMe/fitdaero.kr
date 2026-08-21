@@ -21,7 +21,7 @@
 
 - 간편 추천은 `POST /api/recommendations/simple`만 사용한다.
 - 요청과 응답의 필드·enum·검증 규칙은 [API 명세](api.md)를 따른다.
-- 개발 서버에서는 `/api`를 로컬 Spring Boot 서버로 프록시한다. 배포 환경에서는 `VITE_API_BASE_URL`을 API 기준 주소로 사용한다.
+- 개발 서버에서는 `/api`를 로컬 Spring Boot 서버로 프록시한다. 운영 환경도 같은 도메인의 `/api` 경로를 백엔드로 프록시한다.
 - 요청 중에는 중복 제출을 막고 진행 상태를 표시한다.
 - `400 VALIDATION_ERROR`는 `fieldErrors`를 해당 입력값과 연결해 표시한다. 네트워크 오류는 재시도할 수 있는 요청 단위 메시지로 표시한다.
 - 정상 응답의 빈 `recommendations`는 오류가 아닌 빈 결과로 표시한다.
