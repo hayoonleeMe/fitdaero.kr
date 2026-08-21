@@ -1,1 +1,5 @@
-.env.local
+# Frontend dependencies and build output
+node_modules
+dist
+*.local
+npm-debug.log*
