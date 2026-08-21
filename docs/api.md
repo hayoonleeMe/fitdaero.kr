@@ -17,8 +17,8 @@
 | 필드 | 타입 | 필수 | 설명 |
 | --- | --- | --- | --- |
 | `goal` | `FitnessGoal` | Y | 사용자의 주 운동 목표 |
-| `sidoCode` | string | Y | 공백이 아닌 최대 20자 시도 코드 |
-| `sigunguCode` | string | N | 최대 20자 시군구 코드. 생략하거나 공백이면 시도 범위로 검색 |
+| `sidoCode` | string | Y | 숫자 2자리 시도 코드 |
+| `sigunguCode` | string | N | 숫자 5자리 시군구 코드. 생략하면 시도 범위로 검색 |
 | `weekdays` | array of `Weekday` | Y | 하나 이상의 가능한 요일 |
 | `preferredCategories` | array of `ProgramCategory` | N | 선호 종목군. 생략 시 빈 목록 |
 | `avoidedCategories` | array of `ProgramCategory` | N | 제외할 종목군. 생략 시 빈 목록 |
@@ -38,8 +38,8 @@
   "goal": "CARDIO_ENDURANCE",
   "activityLevel": "LOW",
   "experienceLevel": "BEGINNER",
-  "sidoCode": "1100000000",
-  "sigunguCode": "1120000000",
+  "sidoCode": "11",
+  "sigunguCode": "11200",
   "weekdays": ["MON", "WED", "FRI"],
   "preferredCategories": ["SWIMMING_AQUA"],
   "avoidedCategories": ["MARTIAL_ARTS"]
@@ -81,8 +81,8 @@
   "relativeGrip": 42.5,
   "sitAndReach": 18.2,
   "crossSitUp": 23,
-  "sidoCode": "1100000000",
-  "sigunguCode": "1120000000",
+  "sidoCode": "11",
+  "sigunguCode": "11200",
   "weekdays": ["MON", "WED", "FRI"],
   "preferredCategories": ["FITNESS_STRENGTH"],
   "avoidedCategories": []

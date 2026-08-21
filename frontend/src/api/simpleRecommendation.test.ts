@@ -9,7 +9,7 @@ const request: SimpleRecommendationRequest = {
   goal: 'CARDIO_ENDURANCE',
   activityLevel: 'LOW',
   experienceLevel: 'BEGINNER',
-  sidoCode: '1100000000',
+  sidoCode: '11',
   weekdays: ['MON'],
   preferredCategories: [],
   avoidedCategories: [],

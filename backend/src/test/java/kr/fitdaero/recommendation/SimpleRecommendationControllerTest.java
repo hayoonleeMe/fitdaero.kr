@@ -31,8 +31,8 @@ class SimpleRecommendationControllerTest {
                 FitnessGoal.CARDIO_ENDURANCE,
                 ActivityLevel.LOW,
                 ExperienceLevel.BEGINNER,
-                "1100000000",
-                "1120000000",
+                "11",
+                "11200",
                 Set.of(Weekday.MON, Weekday.WED),
                 Set.of(ProgramCategory.SWIMMING_AQUA),
                 Set.of(ProgramCategory.MARTIAL_ARTS))))
@@ -77,22 +77,22 @@ class SimpleRecommendationControllerTest {
                 FitnessGoal.CARDIO_ENDURANCE,
                 ActivityLevel.LOW,
                 ExperienceLevel.BEGINNER,
-                "1100000000",
-                "1120000000",
+                "11",
+                "11200",
                 Set.of(Weekday.MON, Weekday.WED),
                 Set.of(ProgramCategory.SWIMMING_AQUA),
                 Set.of(ProgramCategory.MARTIAL_ARTS)));
   }
 
   @Test
-  void defaultsOptionalCategoriesAndTreatsBlankSigunguCodeAsSidoSearch() throws Exception {
+  void defaultsOptionalCategoriesAndTreatsMissingSigunguCodeAsSidoSearch() throws Exception {
     when(simpleRecommendationService.recommend(
             new SimpleRecommendationRequest(
                 FitnessGoal.CARDIO_ENDURANCE,
                 ActivityLevel.LOW,
                 ExperienceLevel.BEGINNER,
-                "1100000000",
-                " ",
+                "11",
+                null,
                 Set.of(Weekday.MON),
                 Set.of(),
                 Set.of())))
@@ -108,8 +108,7 @@ class SimpleRecommendationControllerTest {
                       "goal": "CARDIO_ENDURANCE",
                       "activityLevel": "LOW",
                       "experienceLevel": "BEGINNER",
-                      "sidoCode": "1100000000",
-                      "sigunguCode": " ",
+                      "sidoCode": "11",
                       "weekdays": ["MON"]
                     }
                     """))
@@ -122,8 +121,8 @@ class SimpleRecommendationControllerTest {
                 FitnessGoal.CARDIO_ENDURANCE,
                 ActivityLevel.LOW,
                 ExperienceLevel.BEGINNER,
-                "1100000000",
-                " ",
+                "11",
+                null,
                 Set.of(Weekday.MON),
                 Set.of(),
                 Set.of()));
@@ -154,6 +153,17 @@ class SimpleRecommendationControllerTest {
                 .content(validRequest().replace("[\"MON\", \"WED\"]", "[]")))
         .andExpect(status().isBadRequest())
         .andExpect(jsonPath("$.fieldErrors[0].field").value("weekdays"));
+  }
+
+  @Test
+  void returnsValidationErrorWhenRegionCodeLengthIsInvalid() throws Exception {
+    mockMvc
+        .perform(
+            post("/api/recommendations/simple")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(validRequest().replace("\"sidoCode\": \"11\"", "\"sidoCode\": \"110\"")))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.fieldErrors[0].field").value("sidoCode"));
   }
 
   @Test
@@ -196,8 +206,8 @@ class SimpleRecommendationControllerTest {
           "goal": "CARDIO_ENDURANCE",
           "activityLevel": "LOW",
           "experienceLevel": "BEGINNER",
-          "sidoCode": "1100000000",
-          "sigunguCode": "1120000000",
+          "sidoCode": "11",
+          "sigunguCode": "11200",
           "weekdays": ["MON", "WED"],
           "preferredCategories": ["SWIMMING_AQUA"],
           "avoidedCategories": ["MARTIAL_ARTS"]
