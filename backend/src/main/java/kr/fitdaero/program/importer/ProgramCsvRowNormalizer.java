@@ -35,9 +35,9 @@ final class ProgramCsvRowNormalizer {
 
   static Optional<ProgramCsvRow> normalize(Map<String, String> row) {
     String facilityName = required(row, "FCLTY_NM");
-    String sidoCode = required(row, "CTPRVN_CD");
+    String sidoCode = regionCode(row, "CTPRVN_CD", 2);
     String sidoName = required(row, "CTPRVN_NM");
-    String sigunguCode = required(row, "SIGNGU_CD");
+    String sigunguCode = regionCode(row, "SIGNGU_CD", 5);
     String sigunguName = required(row, "SIGNGU_NM");
     String name = required(row, "PROGRM_NM");
     LocalDate startsOn = date(row.get("PROGRM_BEGIN_DE"));
@@ -88,6 +88,11 @@ final class ProgramCsvRowNormalizer {
   private static String required(Map<String, String> row, String column) {
     String value = text(row.get(column));
     return value.isEmpty() ? null : value;
+  }
+
+  private static String regionCode(Map<String, String> row, String column, int length) {
+    String code = required(row, column);
+    return code != null && code.length() == 10 ? code.substring(0, length) : null;
   }
 
   private static LocalDate date(String value) {

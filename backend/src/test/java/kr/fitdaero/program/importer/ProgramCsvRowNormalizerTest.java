@@ -24,6 +24,8 @@ class ProgramCsvRowNormalizerTest {
             .orElseThrow();
 
     assertThat(row.name()).isEqualTo("아쿠아 요가");
+    assertThat(row.sidoCode()).isEqualTo("11");
+    assertThat(row.sigunguCode()).isEqualTo("11000");
     assertThat(row.typeName()).isEqualTo("헬스");
     assertThat(row.targetName()).isEqualTo("성인 / 청소년");
     assertThat(row.timeText()).isEqualTo("10:00 11:00");
@@ -81,9 +83,9 @@ class ProgramCsvRowNormalizerTest {
     Map<String, String> row = new HashMap<>();
     row.put("FCLTY_NM", "핏대로 체육관");
     row.put("FCLTY_ADDR", "서울특별시 종로구 운동로 1");
-    row.put("CTPRVN_CD", "11");
+    row.put("CTPRVN_CD", "1100000000");
     row.put("CTPRVN_NM", "서울특별시");
-    row.put("SIGNGU_CD", "11000");
+    row.put("SIGNGU_CD", "1100000000");
     row.put("SIGNGU_NM", "종로구");
     row.put("PROGRM_TY_NM", "수영");
     row.put("PROGRM_NM", "성인 수영");

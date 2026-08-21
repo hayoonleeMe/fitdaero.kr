@@ -1,3 +1,22 @@
-# Raw public-data artifacts (kept outside Git)
+# Local secrets and raw data
 /data/
 .env
+.env.*
+!.env.example
+
+# Editor files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+*.ipr
+*.iws
+*.suo
+.DS_Store
+
+# Local Codex state
+/.codex/
+
+# Logs
+logs/
+*.log
