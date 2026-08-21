@@ -4,7 +4,7 @@ FitDaero의 간편 추천 웹 클라이언트다. React, TypeScript, Vite, Tailw
 
 ## 실행
 
-Node.js LTS와 npm이 필요하다.
+Node.js 22와 npm이 필요하다.
 
 ```bash
 npm install
