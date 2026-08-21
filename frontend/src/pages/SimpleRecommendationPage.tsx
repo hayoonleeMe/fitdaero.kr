@@ -10,6 +10,7 @@ import {
   type SimpleRecommendationResponse,
   type Weekday,
 } from '../api/simpleRecommendation'
+import { getSigungus, regions } from '../data/regions'
 
 const goals: ReadonlyArray<{ value: FitnessGoal; label: string }> = [
   { value: 'STRENGTH', label: '근력' },
@@ -72,8 +73,11 @@ export default function SimpleRecommendationPage() {
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [requestError, setRequestError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [sidoCode, setSidoCode] = useState('')
+  const [sigunguCode, setSigunguCode] = useState('')
   const [preferredCategories, setPreferredCategories] = useState<SelectableProgramCategory[]>([])
   const [avoidedCategories, setAvoidedCategories] = useState<SelectableProgramCategory[]>([])
+  const sigungus = getSigungus(sidoCode)
 
   async function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -86,12 +90,11 @@ export default function SimpleRecommendationPage() {
       return
     }
 
-    const sigunguCode = String(formData.get('sigunguCode') ?? '').trim()
     const request: SimpleRecommendationRequest = {
       goal: String(formData.get('goal')) as FitnessGoal,
       activityLevel: String(formData.get('activityLevel')) as ActivityLevel,
       experienceLevel: String(formData.get('experienceLevel')) as ExperienceLevel,
-      sidoCode: String(formData.get('sidoCode')).trim(),
+      sidoCode,
       ...(sigunguCode ? { sigunguCode } : {}),
       weekdays: selectedWeekdays,
       preferredCategories,
@@ -157,33 +160,53 @@ export default function SimpleRecommendationPage() {
             />
             <div>
               <label className="text-sm font-medium" htmlFor="sidoCode">
-                시도 코드
+                시도
               </label>
-              <input
+              <select
                 aria-describedby={fieldErrors.sidoCode ? 'sidoCode-error' : undefined}
                 aria-invalid={Boolean(fieldErrors.sidoCode)}
                 className={inputClassName}
                 id="sidoCode"
-                maxLength={20}
                 name="sidoCode"
-                placeholder="예: 1100000000"
                 required
-              />
+                value={sidoCode}
+                onChange={(event) => {
+                  setSidoCode(event.target.value)
+                  setSigunguCode('')
+                }}
+              >
+                <option disabled value="">
+                  선택해 주세요
+                </option>
+                {regions.map((region) => (
+                  <option key={region.code} value={region.code}>
+                    {region.name}
+                  </option>
+                ))}
+              </select>
               <FieldError id="sidoCode-error" message={fieldErrors.sidoCode} />
             </div>
             <div className="sm:col-span-2">
               <label className="text-sm font-medium" htmlFor="sigunguCode">
-                시군구 코드 <span className="font-normal text-slate-500">(선택)</span>
+                시군구 <span className="font-normal text-slate-500">(선택)</span>
               </label>
-              <input
+              <select
                 aria-describedby={fieldErrors.sigunguCode ? 'sigunguCode-error' : undefined}
                 aria-invalid={Boolean(fieldErrors.sigunguCode)}
                 className={inputClassName}
+                disabled={!sidoCode}
                 id="sigunguCode"
-                maxLength={20}
                 name="sigunguCode"
-                placeholder="비워 두면 시도 전체에서 찾아요. 예: 1120000000"
-              />
+                value={sigunguCode}
+                onChange={(event) => setSigunguCode(event.target.value)}
+              >
+                <option value="">시도 전체</option>
+                {sigungus.map((sigungu) => (
+                  <option key={sigungu.code} value={sigungu.code}>
+                    {sigungu.name}
+                  </option>
+                ))}
+              </select>
               <FieldError id="sigunguCode-error" message={fieldErrors.sigunguCode} />
             </div>
           </div>
