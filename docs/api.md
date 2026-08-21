@@ -10,22 +10,22 @@
 - `preferredCategories`와 `avoidedCategories`는 `ProgramCategory`의 복수 선택값이며 서로 겹칠 수 없다.
 - 추천 결과는 최대 5건이다.
 - 추천 요청은 적재를 실행하지 않는다. 기본 실행에서는 기존 완료 데이터만 사용하며, 프로그램 데이터가 없으면 빈 `recommendations`를 반환한다.
-- `dataVersions.publicProgram`은 가장 최근 완료 프로그램 적재의 `data_version`이며, 완료 프로그램 데이터가 없으면 `null`이다. 정밀 분석의 `dataVersions.fitnessReference`는 사용한 최신 완료 체력 API 적재의 `data_version`이다.
+- `dataVersions.publicFacilityProgram`은 가장 최근 완료 프로그램 적재의 `data_version`이며, 완료 프로그램 데이터가 없으면 `null`이다. 정밀 분석의 `dataVersions.fitnessReference`는 사용한 최신 완료 체력 API 적재의 `data_version`이다.
 
 ### 공통 입력 필드
 
 | 필드 | 타입 | 필수 | 설명 |
 | --- | --- | --- | --- |
 | `goal` | `FitnessGoal` | Y | 사용자의 주 운동 목표 |
-| `sidoCode` | string | Y | 시도 코드 |
-| `sigunguCode` | string | N | 시군구 코드 |
-| `weekdays` | array of `Weekday` | Y | 가능한 요일 |
-| `preferredCategories` | array of `ProgramCategory` | N | 선호 종목군 |
-| `avoidedCategories` | array of `ProgramCategory` | N | 제외할 종목군 |
+| `sidoCode` | string | Y | 공백이 아닌 최대 20자 시도 코드 |
+| `sigunguCode` | string | N | 최대 20자 시군구 코드. 생략하거나 공백이면 시도 범위로 검색 |
+| `weekdays` | array of `Weekday` | Y | 하나 이상의 가능한 요일 |
+| `preferredCategories` | array of `ProgramCategory` | N | 선호 종목군. 생략 시 빈 목록 |
+| `avoidedCategories` | array of `ProgramCategory` | N | 제외할 종목군. 생략 시 빈 목록 |
 
 `FitnessGoal`은 `STRENGTH`, `MUSCULAR_ENDURANCE`, `FLEXIBILITY`, `CARDIO_ENDURANCE`, `WEIGHT_MANAGEMENT`, `STRESS_RELIEF`다.
 
-`ProgramCategory`는 `SWIMMING_AQUA`, `FITNESS_STRENGTH`, `YOGA_PILATES`, `CARDIO`, `DANCE_AEROBIC`, `RACKET_SPORTS`, `BALL_SPORTS`, `MARTIAL_ARTS`, `CLIMBING`, `GOLF`, `OTHER`다. `OTHER`는 선호·비선호 입력값으로 허용하지 않는다.
+`ProgramCategory`는 `SWIMMING_AQUA`, `FITNESS_STRENGTH`, `YOGA_PILATES`, `CARDIO`, `DANCE_AEROBIC`, `RACKET_SPORTS`, `BALL_SPORTS`, `MARTIAL_ARTS`, `CLIMBING`, `GOLF`, `OTHER`다. `OTHER`는 선호·비선호 입력값으로 허용하지 않으며, 선호·비선호 종목은 서로 겹칠 수 없다.
 
 ## 간편 분석
 
@@ -46,10 +46,10 @@
 }
 ```
 
-| 추가 필드 | 타입 | 설명 |
-| --- | --- | --- |
-| `activityLevel` | `NONE`, `LOW`, `MODERATE`, `HIGH` | 주간 활동량 |
-| `experienceLevel` | `BEGINNER`, `RETURNING`, `REGULAR` | 운동 경험 |
+| 추가 필드 | 타입 | 필수 | 설명 |
+| --- | --- | --- | --- |
+| `activityLevel` | `NONE`, `LOW`, `MODERATE`, `HIGH` | Y | 주간 활동량 |
+| `experienceLevel` | `BEGINNER`, `RETURNING`, `REGULAR` | Y | 운동 경험 |
 
 #### 응답
 
@@ -60,7 +60,7 @@
   "analysisType": "SIMPLE",
   "analysisSummary": "선택한 목표와 생활 응답을 바탕으로 추천했어요.",
   "dataVersions": {
-    "publicProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606"
+    "publicFacilityProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606"
   },
   "searchScope": "SIGUNGU",
   "recommendations": []
@@ -121,7 +121,7 @@
     }
   ],
   "dataVersions": {
-    "publicProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606",
+    "publicFacilityProgram": "KS_PUBLIC_ALSFC_PROGRM_INFO_202606",
     "fitnessReference": "NFA_API_202201-202608"
   },
   "searchScope": "SIDO_FALLBACK",
